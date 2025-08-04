@@ -25,11 +25,14 @@ const Studio = () => {
   const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
   const [timelineZoom, setTimelineZoom] = useState(1);
 
-  const handleCreateSegment = (startTime: number, endTime: number) => {
+  const handleCreateSegment = (duration: number) => {
+    // 计算新片段的开始时间（紧接着最后一个片段）
+    const totalDuration = segments.reduce((sum, seg) => sum + (seg.endTime - seg.startTime), 0);
+    
     const newSegment: Segment = {
       id: crypto.randomUUID(),
-      startTime,
-      endTime,
+      startTime: totalDuration,
+      endTime: totalDuration + duration,
       description: '',
       status: 'empty'
     };

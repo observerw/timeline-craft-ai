@@ -18,14 +18,14 @@ interface TimelineEditorProps {
   segments: Segment[];
   selectedSegment: Segment | null;
   zoom: number;
-  onCreateSegment: (startTime: number, endTime: number) => void;
+  onCreateSegment: (duration: number) => void;
   onSelectSegment: (segment: Segment | null) => void;
   onUpdateSegment: (id: string, updates: Partial<Segment>) => void;
   onDeleteSegment: (id: string) => void;
   onZoomChange: (zoom: number) => void;
 }
 
-const TIMELINE_DURATION = 60; // 60秒总时长
+const TIMELINE_DURATION = 180; // 3分钟总时长
 const PIXELS_PER_SECOND = 40; // 基础像素/秒
 
 export const TimelineEditor = ({
@@ -69,11 +69,10 @@ export const TimelineEditor = ({
 
   const handleMouseUp = () => {
     if (isDragging && dragStart !== null && dragEnd !== null) {
-      const startTime = Math.min(dragStart, dragEnd);
-      const endTime = Math.max(dragStart, dragEnd);
+      const duration = Math.abs(dragEnd - dragStart);
       
-      if (endTime - startTime > 0.5) { // 最小0.5秒
-        onCreateSegment(startTime, endTime);
+      if (duration > 0.5) { // 最小0.5秒
+        onCreateSegment(duration);
       }
     }
     
@@ -123,7 +122,7 @@ export const TimelineEditor = ({
         </div>
         
         <div className="text-sm text-muted-foreground">
-          拖拽创建片段 • 总时长: {formatTime(TIMELINE_DURATION)}
+          拖拽创建片段，自动吸附到末尾 • 总时长: {formatTime(TIMELINE_DURATION)}
         </div>
       </div>
 
@@ -172,8 +171,15 @@ export const TimelineEditor = ({
           />
         )}
 
-        {/* 片段 */}
-        {segments.map((segment) => (
+        {/* 片段 - 显示连贯排列的位置 */}
+        {(() => {
+          let currentTime = 0;
+          return segments.map((segment) => {
+            const segmentStartTime = currentTime;
+            const segmentDuration = segment.endTime - segment.startTime;
+            currentTime += segmentDuration;
+            
+            return (
           <div key={segment.id} className="absolute top-2 bottom-2 group">
             <div
               className={cn(
@@ -182,8 +188,8 @@ export const TimelineEditor = ({
                 selectedSegment?.id === segment.id ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""
               )}
               style={{
-                left: `${getPositionFromTime(segment.startTime)}px`,
-                width: `${getPositionFromTime(segment.endTime - segment.startTime)}px`
+                left: `${getPositionFromTime(segmentStartTime)}px`,
+                width: `${getPositionFromTime(segmentDuration)}px`
               }}
               onClick={(e) => {
                 e.stopPropagation();
@@ -221,7 +227,9 @@ export const TimelineEditor = ({
               </Button>
             </div>
           </div>
-        ))}
+            );
+          });
+        })()}
       </div>
 
       {/* 时间显示 */}
