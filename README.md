@@ -48,10 +48,10 @@ git clone <YOUR_GIT_URL>
 cd timeline-craft-ai
 
 # 安装依赖
-npm install
+pnpm install
 
 # 启动开发服务器
-npm run dev
+pnpm run dev
 ```
 
 ## 📖 使用指南
