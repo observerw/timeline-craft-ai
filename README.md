@@ -1,75 +1,70 @@
-# Welcome to your Lovable project
+# Timeline Craft AI - 时间轴视频创作工具
 
 [![Deploy to GitHub Pages](https://github.com/observerw/timeline-craft-ai/actions/workflows/deploy.yml/badge.svg)](https://github.com/observerw/timeline-craft-ai/actions/workflows/deploy.yml)
 
-## Project info
+一个基于时间轴的智能视频创作工具，让您通过简单的文字描述就能创建精美的视频内容。
 
-**URL**: <https://lovable.dev/projects/09cafb1e-b7b0-4a75-943b-0a63c384b63e>
+## ✨ 主要功能
 
-## How can I edit this code?
+### 🎬 时间轴编辑
 
-There are several ways of editing your application.
+- **直观的时间轴界面**：类似专业视频剪辑软件的操作体验
+- **灵活的片段管理**：拖拽创建、调整片段时长
+- **可视化状态**：实时查看每个片段的生成状态
 
-**Use Lovable**
+### 🖼️ AI 图像生成
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/09cafb1e-b7b0-4a75-943b-0a63c384b63e) and start prompting.
+- **文字转图像**：输入描述自动生成片段的首帧和尾帧
+- **精确控制**：为每个片段单独调整和重新生成图像
+- **实时预览**：即时查看生成效果
 
-Changes made via Lovable will be committed automatically to this repo.
+### 🎥 智能视频合成
 
-**Use your preferred IDE**
+- **一键生成**：所有片段准备就绪后自动合成完整视频
+- **无缝拼接**：AI 智能处理片段间的过渡效果
+- **即时播放**：内置播放器支持预览和进度控制
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 📁 项目管理
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- **项目保存**：自动保存您的创作进度
+- **历史记录**：管理和重新编辑之前的项目
+- **快速导出**：支持 MP4 格式视频下载
 
-Follow these steps:
+## 🚀 快速开始
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+### 在线使用
+
+访问我们的在线版本，无需安装即可开始创作。
+
+### 本地运行
+
+如果您想在本地运行项目：
+
+```bash
+# 克隆项目
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# 进入项目目录
+cd timeline-craft-ai
 
-# Step 3: Install the necessary dependencies.
-npm i
+# 安装依赖
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 启动开发服务器
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## 📖 使用指南
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. **创建片段**：在时间轴上双击或拖拽创建新的视频片段
+2. **添加描述**：为每个片段输入文字描述，AI 将据此生成图像
+3. **调整细节**：预览生成的首尾帧图像，可单独重新生成
+4. **生成视频**：当所有片段准备完毕后，点击生成完整视频
+5. **导出分享**：下载视频或保存项目以便后续编辑
 
-**Use GitHub Codespaces**
+## 🛠️ 技术栈
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/09cafb1e-b7b0-4a75-943b-0a63c384b63e) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- **前端框架**：React + TypeScript
+- **构建工具**：Vite
+- **UI 组件**：shadcn/ui + Tailwind CSS
+- **AI 集成**：文生图和文生视频 API
