@@ -1,17 +1,17 @@
-import { useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { X, RefreshCw, Image, Loader2, AlertCircle } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { AlertCircle, Image, Loader2, RefreshCw, X } from "lucide-react";
+import { useState } from "react";
 
 export interface Segment {
   id: string;
   startTime: number;
   endTime: number;
   description: string;
-  status: 'empty' | 'generating' | 'ready' | 'error';
+  status: "empty" | "generating" | "ready" | "error";
   startFrame?: string;
   endFrame?: string;
 }
@@ -27,7 +27,7 @@ export const SegmentEditPanel = ({
   segment,
   onUpdateSegment,
   onGenerateImages,
-  onClose
+  onClose,
 }: SegmentEditPanelProps) => {
   const [description, setDescription] = useState(segment.description);
   const [imageDescription, setImageDescription] = useState("");
@@ -35,7 +35,7 @@ export const SegmentEditPanel = ({
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const handleDescriptionChange = (value: string) => {
@@ -45,16 +45,20 @@ export const SegmentEditPanel = ({
 
   const getStatusDisplay = () => {
     switch (segment.status) {
-      case 'empty':
-        return { text: '等待描述', color: 'text-muted-foreground', icon: null };
-      case 'generating':
-        return { text: '生成中...', color: 'text-primary', icon: Loader2 };
-      case 'ready':
-        return { text: '已就绪', color: 'text-green-500', icon: null };
-      case 'error':
-        return { text: '生成失败', color: 'text-destructive', icon: AlertCircle };
+      case "empty":
+        return { text: "等待描述", color: "text-muted-foreground", icon: null };
+      case "generating":
+        return { text: "生成中...", color: "text-primary", icon: Loader2 };
+      case "ready":
+        return { text: "已就绪", color: "text-green-500", icon: null };
+      case "error":
+        return {
+          text: "生成失败",
+          color: "text-destructive",
+          icon: AlertCircle,
+        };
       default:
-        return { text: '未知状态', color: 'text-muted-foreground', icon: null };
+        return { text: "未知状态", color: "text-muted-foreground", icon: null };
     }
   };
 
@@ -81,7 +85,13 @@ export const SegmentEditPanel = ({
         {/* 状态显示 */}
         <Card className="p-3 bg-secondary/50">
           <div className="flex items-center gap-2">
-            {StatusIcon && <StatusIcon className={`h-4 w-4 ${status.color} ${segment.status === 'generating' ? 'animate-spin' : ''}`} />}
+            {StatusIcon && (
+              <StatusIcon
+                className={`h-4 w-4 ${status.color} ${
+                  segment.status === "generating" ? "animate-spin" : ""
+                }`}
+              />
+            )}
             <span className={`text-sm font-medium ${status.color}`}>
               {status.text}
             </span>
@@ -91,19 +101,25 @@ export const SegmentEditPanel = ({
         {/* 描述输入 */}
         <div className="space-y-3">
           <Label htmlFor="description">片段描述</Label>
-          
+
           {/* 三要素指导 */}
           <Card className="p-3 bg-primary/5 border-primary/20">
             <div className="text-sm space-y-1">
               <p className="font-medium text-primary mb-2">描述三要素：</p>
               <div className="grid grid-cols-1 gap-1 text-xs text-muted-foreground">
-                <span><strong>主体：</strong>画面中的人物、动物、物体等主体</span>
-                <span><strong>运动：</strong>目标主体希望实现的运动轨迹</span>
-                <span><strong>背景：</strong>画面中的背景环境</span>
+                <span>
+                  <strong>主体：</strong>画面中的人物、动物、物体等主体
+                </span>
+                <span>
+                  <strong>运动：</strong>目标主体希望实现的运动轨迹
+                </span>
+                <span>
+                  <strong>背景：</strong>画面中的背景环境
+                </span>
               </div>
             </div>
           </Card>
-          
+
           <Textarea
             id="description"
             placeholder="例如：一只橘色小猫（主体）在阳光明媚的花园里缓慢行走（运动），周围有盛开的鲜花和绿色草地（背景）"
@@ -131,10 +147,10 @@ export const SegmentEditPanel = ({
         {/* 生成按钮 */}
         <Button
           onClick={() => onGenerateImages(segment)}
-          disabled={!description.trim() || segment.status === 'generating'}
+          disabled={!description.trim() || segment.status === "generating"}
           className="w-full"
         >
-          {segment.status === 'generating' ? (
+          {segment.status === "generating" ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
           ) : (
             <Image className="h-4 w-4 mr-2" />
@@ -147,7 +163,7 @@ export const SegmentEditPanel = ({
         {/* 图像预览区域 */}
         <div className="space-y-4">
           <h4 className="font-medium">图像预览</h4>
-          
+
           {/* 首帧 */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -157,7 +173,7 @@ export const SegmentEditPanel = ({
                   variant="ghost"
                   size="sm"
                   onClick={() => onGenerateImages(segment)}
-                  disabled={segment.status === 'generating'}
+                  disabled={segment.status === "generating"}
                 >
                   <RefreshCw className="h-3 w-3 mr-1" />
                   重新生成
@@ -172,7 +188,7 @@ export const SegmentEditPanel = ({
                   className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
                   onClick={() => {
                     // 打开大图预览
-                    window.open(segment.startFrame, '_blank');
+                    window.open(segment.startFrame, "_blank");
                   }}
                 />
               ) : (
@@ -195,7 +211,7 @@ export const SegmentEditPanel = ({
                   variant="ghost"
                   size="sm"
                   onClick={() => onGenerateImages(segment)}
-                  disabled={segment.status === 'generating'}
+                  disabled={segment.status === "generating"}
                 >
                   <RefreshCw className="h-3 w-3 mr-1" />
                   重新生成
@@ -210,7 +226,7 @@ export const SegmentEditPanel = ({
                   className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
                   onClick={() => {
                     // 打开大图预览
-                    window.open(segment.endFrame, '_blank');
+                    window.open(segment.endFrame, "_blank");
                   }}
                 />
               ) : (

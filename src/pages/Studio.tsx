@@ -114,7 +114,7 @@ const Studio = () => {
     segments.every(seg => seg.status === 'ready');
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* 顶部导航栏 */}
       <header className="border-b border-border bg-card/50 backdrop-blur">
         <div className="flex items-center justify-between px-6 py-4">
@@ -151,7 +151,7 @@ const Studio = () => {
         </div>
       </header>
 
-      <div className="flex h-[calc(100vh-80px)]">
+      <div className="flex min-h-0 flex-1">
         {/* 主编辑区域 */}
         <div className="flex-1 flex flex-col">
           {/* 视频播放器区域 */}

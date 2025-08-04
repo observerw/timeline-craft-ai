@@ -62,7 +62,7 @@ const Projects = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* 顶部导航栏 */}
       <header className="border-b border-border bg-card/50 backdrop-blur">
         <div className="flex items-center justify-between px-6 py-4">
@@ -89,7 +89,7 @@ const Projects = () => {
       </header>
 
       {/* 项目列表 */}
-      <div className="p-6">
+      <div className="flex-1 p-6">
         <div className="mb-6">
           <h2 className="text-2xl font-bold mb-2">我的项目</h2>
           <p className="text-muted-foreground">
