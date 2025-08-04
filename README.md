@@ -1,8 +1,10 @@
 # Welcome to your Lovable project
 
+[![Deploy to GitHub Pages](https://github.com/observerw/timeline-craft-ai/actions/workflows/deploy.yml/badge.svg)](https://github.com/observerw/timeline-craft-ai/actions/workflows/deploy.yml)
+
 ## Project info
 
-**URL**: https://lovable.dev/projects/09cafb1e-b7b0-4a75-943b-0a63c384b63e
+**URL**: <https://lovable.dev/projects/09cafb1e-b7b0-4a75-943b-0a63c384b63e>
 
 ## How can I edit this code?
 
