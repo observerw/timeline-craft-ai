@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut, Plus, Trash2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useState, useRef, useEffect } from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ZoomIn, ZoomOut, Plus, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export interface Segment {
   id: string;
@@ -36,7 +36,7 @@ export const TimelineEditor = ({
   onSelectSegment,
   onUpdateSegment,
   onDeleteSegment,
-  onZoomChange
+  onZoomChange,
 }: TimelineEditorProps) => {
   const timelineRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -49,7 +49,10 @@ export const TimelineEditor = ({
     if (!timelineRef.current) return 0;
     const rect = timelineRef.current.getBoundingClientRect();
     const relativeX = x - rect.left;
-    return Math.max(0, Math.min(TIMELINE_DURATION, relativeX / (getPixelsPerSecond() * zoom)));
+    return Math.max(
+      0,
+      Math.min(TIMELINE_DURATION, relativeX / (getPixelsPerSecond() * zoom))
+    );
   };
 
   // 动态计算像素比例，确保时间轴适应容器宽度
@@ -74,7 +77,7 @@ export const TimelineEditor = ({
 
     updateContainerWidth();
     window.addEventListener('resize', updateContainerWidth);
-    
+
     return () => {
       window.removeEventListener('resize', updateContainerWidth);
     };
@@ -96,12 +99,13 @@ export const TimelineEditor = ({
   const handleMouseUp = () => {
     if (isDragging && dragStart !== null && dragEnd !== null) {
       const duration = Math.abs(dragEnd - dragStart);
-      
-      if (duration > 0.5) { // 最小0.5秒
+
+      if (duration > 0.5) {
+        // 最小0.5秒
         onCreateSegment(duration);
       }
     }
-    
+
     setIsDragging(false);
     setDragStart(null);
     setDragEnd(null);
@@ -109,11 +113,16 @@ export const TimelineEditor = ({
 
   const getStatusColor = (status: Segment['status']) => {
     switch (status) {
-      case 'empty': return 'bg-muted border-border';
-      case 'generating': return 'bg-primary/20 border-primary animate-glow-pulse';
-      case 'ready': return 'bg-primary/40 border-primary';
-      case 'error': return 'bg-destructive/20 border-destructive';
-      default: return 'bg-muted border-border';
+      case 'empty':
+        return 'bg-muted border-border';
+      case 'generating':
+        return 'bg-primary/20 border-primary animate-glow-pulse';
+      case 'ready':
+        return 'bg-primary/40 border-primary';
+      case 'error':
+        return 'bg-destructive/20 border-destructive';
+      default:
+        return 'bg-muted border-border';
     }
   };
 
@@ -146,40 +155,45 @@ export const TimelineEditor = ({
             <ZoomIn className="h-4 w-4" />
           </Button>
         </div>
-        
+
         <div className="text-xs sm:text-sm text-muted-foreground">
-          <span className="hidden sm:inline">拖拽创建片段，自动吸附到末尾 • </span>
+          <span className="hidden sm:inline">
+            拖拽创建片段，自动吸附到末尾 •{' '}
+          </span>
           总时长: {formatTime(TIMELINE_DURATION)}
         </div>
       </div>
 
       {/* 时间轴容器 - 统一滚动 */}
       <div ref={containerRef} className="overflow-x-auto border rounded-lg">
-        <div 
+        <div
           className="relative"
-          style={{ 
+          style={{
             width: `${TIMELINE_DURATION * getPixelsPerSecond() * zoom}px`,
-            minWidth: '100%'
+            minWidth: '100%',
           }}
         >
           {/* 时间刻度 */}
           <div className="relative mb-2">
-            <div 
+            <div
               className="flex text-xs text-muted-foreground"
-              style={{ 
+              style={{
                 width: `${TIMELINE_DURATION * getPixelsPerSecond() * zoom}px`,
-                minWidth: '100%'
+                minWidth: '100%',
               }}
             >
-              {Array.from({ length: Math.ceil(TIMELINE_DURATION / 5) + 1 }, (_, i) => (
-                <div
-                  key={i}
-                  className="flex-shrink-0"
-                  style={{ width: `${5 * getPixelsPerSecond() * zoom}px` }}
-                >
-                  {formatTime(i * 5)}
-                </div>
-              ))}
+              {Array.from(
+                { length: Math.ceil(TIMELINE_DURATION / 5) + 1 },
+                (_, i) => (
+                  <div
+                    key={i}
+                    className="flex-shrink-0"
+                    style={{ width: `${5 * getPixelsPerSecond() * zoom}px` }}
+                  >
+                    {formatTime(i * 5)}
+                  </div>
+                )
+              )}
             </div>
           </div>
 
@@ -187,9 +201,9 @@ export const TimelineEditor = ({
           <div
             ref={timelineRef}
             className="relative h-20 bg-secondary/30 rounded-lg border border-border cursor-crosshair"
-            style={{ 
+            style={{
               width: `${TIMELINE_DURATION * getPixelsPerSecond() * zoom}px`,
-              minWidth: '100%'
+              minWidth: '100%',
             }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
@@ -211,7 +225,7 @@ export const TimelineEditor = ({
                 className="absolute top-2 bottom-2 bg-primary/30 border border-primary rounded"
                 style={{
                   left: `${getPositionFromTime(Math.min(dragStart, dragEnd))}px`,
-                  width: `${getPositionFromTime(Math.abs(dragEnd - dragStart))}px`
+                  width: `${getPositionFromTime(Math.abs(dragEnd - dragStart))}px`,
                 }}
               />
             )}
@@ -223,18 +237,23 @@ export const TimelineEditor = ({
                 const segmentStartTime = currentTime;
                 const segmentDuration = segment.endTime - segment.startTime;
                 currentTime += segmentDuration;
-                
+
                 return (
-                  <div key={segment.id} className="absolute top-2 bottom-2 group hover:z-10">
+                  <div
+                    key={segment.id}
+                    className="absolute top-2 bottom-2 group hover:z-10"
+                  >
                     <div
                       className={cn(
-                        "h-full rounded border-2 transition-all cursor-pointer relative",
+                        'h-full rounded border-2 transition-all cursor-pointer relative',
                         getStatusColor(segment.status),
-                        selectedSegment?.id === segment.id ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""
+                        selectedSegment?.id === segment.id
+                          ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
+                          : ''
                       )}
                       style={{
                         left: `${getPositionFromTime(segmentStartTime)}px`,
-                        width: `${getPositionFromTime(segmentDuration)}px`
+                        width: `${getPositionFromTime(segmentDuration)}px`,
                       }}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -242,9 +261,9 @@ export const TimelineEditor = ({
                       }}
                     >
                       <div className="p-2 text-xs font-medium truncate">
-                        {segment.description || "未命名片段"}
+                        {segment.description || '未命名片段'}
                       </div>
-                      
+
                       {/* 状态指示器 */}
                       <div className="absolute top-1 right-1">
                         {segment.status === 'generating' && (

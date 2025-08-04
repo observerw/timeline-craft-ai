@@ -1,12 +1,12 @@
-import { useState, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Play, Pause, Download, Save, HelpCircle } from "lucide-react";
-import { TimelineEditor } from "@/components/studio/TimelineEditor";
-import { SegmentEditPanel } from "@/components/studio/SegmentEditPanel";
-import { VideoPlayer } from "@/components/studio/VideoPlayer";
-import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Play, Pause, Download, Save, HelpCircle } from 'lucide-react';
+import { TimelineEditor } from '@/components/studio/TimelineEditor';
+import { SegmentEditPanel } from '@/components/studio/SegmentEditPanel';
+import { VideoPlayer } from '@/components/studio/VideoPlayer';
+import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 
 export interface Segment {
   id: string;
@@ -27,30 +27,33 @@ const Studio = () => {
 
   const handleCreateSegment = (duration: number) => {
     // 计算新片段的开始时间（紧接着最后一个片段）
-    const totalDuration = segments.reduce((sum, seg) => sum + (seg.endTime - seg.startTime), 0);
-    
+    const totalDuration = segments.reduce(
+      (sum, seg) => sum + (seg.endTime - seg.startTime),
+      0
+    );
+
     const newSegment: Segment = {
       id: crypto.randomUUID(),
       startTime: totalDuration,
       endTime: totalDuration + duration,
       description: '',
-      status: 'empty'
+      status: 'empty',
     };
     setSegments([...segments, newSegment]);
     setSelectedSegment(newSegment);
   };
 
   const handleUpdateSegment = (id: string, updates: Partial<Segment>) => {
-    setSegments(segments.map(seg => 
-      seg.id === id ? { ...seg, ...updates } : seg
-    ));
+    setSegments(
+      segments.map((seg) => (seg.id === id ? { ...seg, ...updates } : seg))
+    );
     if (selectedSegment?.id === id) {
       setSelectedSegment({ ...selectedSegment, ...updates });
     }
   };
 
   const handleDeleteSegment = (id: string) => {
-    setSegments(segments.filter(seg => seg.id !== id));
+    setSegments(segments.filter((seg) => seg.id !== id));
     if (selectedSegment?.id === id) {
       setSelectedSegment(null);
     }
@@ -58,60 +61,60 @@ const Studio = () => {
 
   const handleGenerateImages = async (segment: Segment) => {
     if (!segment.description.trim()) {
-      toast.error("请先添加片段描述");
+      toast.error('请先添加片段描述');
       return;
     }
 
     handleUpdateSegment(segment.id, { status: 'generating' });
-    
+
     try {
       // 模拟图像生成 API 调用
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       // 模拟生成的图像 URLs
       const startFrame = `https://picsum.photos/800/600?random=${segment.id}-start`;
       const endFrame = `https://picsum.photos/800/600?random=${segment.id}-end`;
-      
-      handleUpdateSegment(segment.id, { 
-        status: 'ready', 
-        startFrame, 
-        endFrame 
+
+      handleUpdateSegment(segment.id, {
+        status: 'ready',
+        startFrame,
+        endFrame,
       });
-      
-      toast.success("图像生成成功！");
+
+      toast.success('图像生成成功！');
     } catch (error) {
       handleUpdateSegment(segment.id, { status: 'error' });
-      toast.error("图像生成失败，请重试");
+      toast.error('图像生成失败，请重试');
     }
   };
 
   const handleGenerateVideo = async () => {
-    const readySegments = segments.filter(seg => seg.status === 'ready');
+    const readySegments = segments.filter((seg) => seg.status === 'ready');
     if (readySegments.length === 0) {
-      toast.error("请先生成所有片段的图像");
+      toast.error('请先生成所有片段的图像');
       return;
     }
 
     setIsGeneratingVideo(true);
-    
+
     try {
       // 模拟视频生成 API 调用
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+
       // 模拟生成的视频 URL
       const videoUrl = `https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4`;
       setGeneratedVideo(videoUrl);
-      
-      toast.success("视频生成成功！");
+
+      toast.success('视频生成成功！');
     } catch (error) {
-      toast.error("视频生成失败，请重试");
+      toast.error('视频生成失败，请重试');
     } finally {
       setIsGeneratingVideo(false);
     }
   };
 
-  const canGenerateVideo = segments.length > 0 && 
-    segments.every(seg => seg.status === 'ready');
+  const canGenerateVideo =
+    segments.length > 0 && segments.every((seg) => seg.status === 'ready');
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -124,26 +127,19 @@ const Studio = () => {
             </div>
             <h1 className="text-xl font-semibold">VideoMaker Studio</h1>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <Button variant="outline" size="sm">
               <HelpCircle className="h-4 w-4 mr-2" />
               帮助
             </Button>
             <Link to="/projects">
-              <Button 
-                variant="outline" 
-                size="sm"
-              >
+              <Button variant="outline" size="sm">
                 <Save className="h-4 w-4 mr-2" />
                 项目
               </Button>
             </Link>
-            <Button 
-              variant="default" 
-              size="sm"
-              disabled={!generatedVideo}
-            >
+            <Button variant="default" size="sm" disabled={!generatedVideo}>
               <Download className="h-4 w-4 mr-2" />
               导出
             </Button>
@@ -156,7 +152,7 @@ const Studio = () => {
         <div className="flex-1 flex flex-col">
           {/* 视频播放器区域 */}
           <div className="flex-1 p-6">
-            <VideoPlayer 
+            <VideoPlayer
               videoUrl={generatedVideo}
               segments={segments}
               onTimeChange={(time) => {
@@ -187,7 +183,7 @@ const Studio = () => {
                   </Button>
                 </div>
               </div>
-              
+
               <TimelineEditor
                 segments={segments}
                 selectedSegment={selectedSegment}

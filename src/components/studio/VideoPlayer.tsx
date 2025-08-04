@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Play, Pause, Volume2, VolumeX, Maximize } from "lucide-react";
-import { Slider } from "@/components/ui/slider";
-import { cn } from "@/lib/utils";
+import { useState, useRef, useEffect } from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Play, Pause, Volume2, VolumeX, Maximize } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import { cn } from '@/lib/utils';
 
 export interface Segment {
   id: string;
@@ -19,7 +19,11 @@ interface VideoPlayerProps {
   onTimeChange?: (time: number) => void;
 }
 
-export const VideoPlayer = ({ videoUrl, segments, onTimeChange }: VideoPlayerProps) => {
+export const VideoPlayer = ({
+  videoUrl,
+  segments,
+  onTimeChange,
+}: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -72,7 +76,7 @@ export const VideoPlayer = ({ videoUrl, segments, onTimeChange }: VideoPlayerPro
   const handleSeek = (value: number[]) => {
     const video = videoRef.current;
     if (!video) return;
-    
+
     video.currentTime = value[0];
     setCurrentTime(value[0]);
   };
@@ -120,8 +124,9 @@ export const VideoPlayer = ({ videoUrl, segments, onTimeChange }: VideoPlayerPro
   };
 
   const getCurrentSegment = () => {
-    return segments.find(segment => 
-      currentTime >= segment.startTime && currentTime <= segment.endTime
+    return segments.find(
+      (segment) =>
+        currentTime >= segment.startTime && currentTime <= segment.endTime
     );
   };
 
@@ -157,14 +162,16 @@ export const VideoPlayer = ({ videoUrl, segments, onTimeChange }: VideoPlayerPro
         {/* 当前片段指示 */}
         {currentSegment && videoUrl && (
           <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
-            正在播放: {currentSegment.description || "未命名片段"}
+            正在播放: {currentSegment.description || '未命名片段'}
           </div>
         )}
 
         {/* 播放控制覆盖层 */}
         {videoUrl && (
-          <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors cursor-pointer flex items-center justify-center group"
-               onClick={handlePlayPause}>
+          <div
+            className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors cursor-pointer flex items-center justify-center group"
+            onClick={handlePlayPause}
+          >
             {!isPlaying && (
               <div className="w-16 h-16 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
                 <Play className="h-8 w-8 text-white ml-1" />
@@ -186,19 +193,19 @@ export const VideoPlayer = ({ videoUrl, segments, onTimeChange }: VideoPlayerPro
               onValueChange={handleSeek}
               className="w-full"
             />
-            
+
             {/* 时间轴片段指示 */}
             <div className="relative h-2">
               {segments.map((segment) => (
                 <div
                   key={segment.id}
                   className={cn(
-                    "absolute h-full rounded-sm",
-                    segment.status === 'ready' ? "bg-primary/60" : "bg-muted/60"
+                    'absolute h-full rounded-sm',
+                    segment.status === 'ready' ? 'bg-primary/60' : 'bg-muted/60'
                   )}
                   style={{
                     left: `${(segment.startTime / duration) * 100}%`,
-                    width: `${((segment.endTime - segment.startTime) / duration) * 100}%`
+                    width: `${((segment.endTime - segment.startTime) / duration) * 100}%`,
                   }}
                 />
               ))}
@@ -234,7 +241,7 @@ export const VideoPlayer = ({ videoUrl, segments, onTimeChange }: VideoPlayerPro
                     <Volume2 className="h-4 w-4" />
                   )}
                 </Button>
-                
+
                 <Slider
                   value={[isMuted ? 0 : volume]}
                   max={1}
