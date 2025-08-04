@@ -133,8 +133,8 @@ export const VideoPlayer = ({
   const currentSegment = getCurrentSegment();
 
   return (
-    <Card className="bg-black/90 backdrop-blur border-border/50 overflow-hidden">
-      <div className="relative aspect-video bg-black flex items-center justify-center">
+    <Card className="bg-black/90 backdrop-blur border-border/50 overflow-hidden h-full max-h-full flex flex-col">
+      <div className="relative flex-1 bg-black flex items-center justify-center min-h-0 max-h-[60vh] w-full">
         {videoUrl ? (
           <video
             ref={videoRef}
@@ -183,7 +183,7 @@ export const VideoPlayer = ({
 
       {/* 控制栏 */}
       {videoUrl && (
-        <div className="p-4 bg-card/80 backdrop-blur space-y-3">
+        <div className="flex-shrink-0 p-4 bg-card/80 backdrop-blur space-y-3">
           {/* 进度条 */}
           <div className="space-y-2">
             <Slider

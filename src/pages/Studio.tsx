@@ -5,6 +5,11 @@ import { Play, Pause, Download, Save, HelpCircle } from 'lucide-react';
 import { TimelineEditor } from '@/components/studio/TimelineEditor';
 import { SegmentEditPanel } from '@/components/studio/SegmentEditPanel';
 import { VideoPlayer } from '@/components/studio/VideoPlayer';
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from '@/components/ui/resizable';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 
@@ -147,69 +152,81 @@ const Studio = () => {
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1">
+      <ResizablePanelGroup direction="horizontal" className="min-h-0 flex-1">
         {/* 主编辑区域 */}
-        <div className="flex-1 flex flex-col">
-          {/* 视频播放器区域 */}
-          <div className="flex-1 p-6">
-            <VideoPlayer
-              videoUrl={generatedVideo}
-              segments={segments}
-              onTimeChange={(time) => {
-                // 处理时间跳转
-              }}
-            />
-          </div>
-
-          {/* 时间轴编辑器 */}
-          <div className="border-t border-border bg-card/30">
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-medium">时间轴编辑器</h3>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={handleGenerateVideo}
-                    disabled={!canGenerateVideo || isGeneratingVideo}
-                    className="bg-primary hover:bg-primary/90"
-                  >
-                    {isGeneratingVideo ? (
-                      <div className="h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2" />
-                    ) : (
-                      <Play className="h-4 w-4 mr-2" />
-                    )}
-                    生成视频
-                  </Button>
-                </div>
+        <ResizablePanel defaultSize={selectedSegment ? 70 : 100} minSize={50}>
+          <div className="flex flex-col h-full">
+            {/* 视频播放器区域 */}
+            <div className="flex-1 p-6 min-h-0 flex flex-col">
+              <div className="flex-1 min-h-0 max-h-full">
+                <VideoPlayer
+                  videoUrl={generatedVideo}
+                  segments={segments}
+                  onTimeChange={(time) => {
+                    // 处理时间跳转
+                  }}
+                />
               </div>
+            </div>
 
-              <TimelineEditor
-                segments={segments}
-                selectedSegment={selectedSegment}
-                zoom={timelineZoom}
-                onCreateSegment={handleCreateSegment}
-                onSelectSegment={setSelectedSegment}
-                onUpdateSegment={handleUpdateSegment}
-                onDeleteSegment={handleDeleteSegment}
-                onZoomChange={setTimelineZoom}
-              />
+            {/* 时间轴编辑器 */}
+            <div className="border-t border-border bg-card/30">
+              <div className="p-4 overflow-x-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-medium">时间轴编辑器</h3>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={handleGenerateVideo}
+                      disabled={!canGenerateVideo || isGeneratingVideo}
+                      className="bg-primary hover:bg-primary/90"
+                    >
+                      {isGeneratingVideo ? (
+                        <div className="h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2" />
+                      ) : (
+                        <Play className="h-4 w-4 mr-2" />
+                      )}
+                      生成视频
+                    </Button>
+                  </div>
+                </div>
+
+                <TimelineEditor
+                  segments={segments}
+                  selectedSegment={selectedSegment}
+                  zoom={timelineZoom}
+                  onCreateSegment={handleCreateSegment}
+                  onSelectSegment={setSelectedSegment}
+                  onUpdateSegment={handleUpdateSegment}
+                  onDeleteSegment={handleDeleteSegment}
+                  onZoomChange={setTimelineZoom}
+                />
+              </div>
             </div>
           </div>
-        </div>
+        </ResizablePanel>
 
         {/* 右侧编辑面板 */}
         {selectedSegment && (
-          <div className="w-96 border-l border-border bg-card/30 animate-slide-in">
-            <SegmentEditPanel
-              segment={selectedSegment}
-              onUpdateSegment={handleUpdateSegment}
-              onGenerateImages={handleGenerateImages}
-              onClose={() => setSelectedSegment(null)}
+          <>
+            <ResizableHandle
+              withHandle
+              className="hover:bg-primary/50 hover:border-primary/80 border-2 border-transparent transition-all duration-200 cursor-col-resize"
             />
-          </div>
+            <ResizablePanel defaultSize={30} minSize={20} maxSize={50}>
+              <div className="border-l border-border bg-card/30 h-full">
+                <SegmentEditPanel
+                  segment={selectedSegment}
+                  onUpdateSegment={handleUpdateSegment}
+                  onGenerateImages={handleGenerateImages}
+                  onClose={() => setSelectedSegment(null)}
+                />
+              </div>
+            </ResizablePanel>
+          </>
         )}
-      </div>
+      </ResizablePanelGroup>
     </div>
   );
 };
