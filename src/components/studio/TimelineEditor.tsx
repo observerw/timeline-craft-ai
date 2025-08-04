@@ -180,7 +180,7 @@ export const TimelineEditor = ({
             currentTime += segmentDuration;
             
             return (
-          <div key={segment.id} className="absolute top-2 bottom-2 group">
+          <div key={segment.id} className="absolute top-2 bottom-2 group hover:z-10">
             <div
               className={cn(
                 "h-full rounded border-2 transition-all cursor-pointer relative",
