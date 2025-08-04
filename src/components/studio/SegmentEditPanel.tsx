@@ -89,17 +89,30 @@ export const SegmentEditPanel = ({
         </Card>
 
         {/* 描述输入 */}
-        <div className="space-y-2">
+        <div className="space-y-3">
           <Label htmlFor="description">片段描述</Label>
+          
+          {/* 三要素指导 */}
+          <Card className="p-3 bg-primary/5 border-primary/20">
+            <div className="text-sm space-y-1">
+              <p className="font-medium text-primary mb-2">描述三要素：</p>
+              <div className="grid grid-cols-1 gap-1 text-xs text-muted-foreground">
+                <span><strong>主体：</strong>画面中的人物、动物、物体等主体</span>
+                <span><strong>运动：</strong>目标主体希望实现的运动轨迹</span>
+                <span><strong>背景：</strong>画面中的背景环境</span>
+              </div>
+            </div>
+          </Card>
+          
           <Textarea
             id="description"
-            placeholder="描述这个片段的内容，例如：一只可爱的猫咪在花园里玩耍..."
+            placeholder="例如：一只橘色小猫（主体）在阳光明媚的花园里缓慢行走（运动），周围有盛开的鲜花和绿色草地（背景）"
             value={description}
             onChange={(e) => handleDescriptionChange(e.target.value)}
-            className="min-h-[100px] resize-none"
+            className="min-h-[120px] resize-none"
           />
           <p className="text-xs text-muted-foreground">
-            详细的描述有助于生成更准确的图像
+            按照主体、运动、背景三要素描述，有助于生成更准确的图像
           </p>
         </div>
 
