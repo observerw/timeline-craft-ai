@@ -10,7 +10,18 @@ export interface Segment {
   startTime: number;
   endTime: number;
   description: string;
-  status: 'empty' | 'generating' | 'ready' | 'error';
+  status:
+    | 'empty'
+    | 'description-added'
+    | 'generating'
+    | 'ready'
+    | 'description-modified'
+    | 'video-ready'
+    | 'error';
+  startFrame?: string;
+  endFrame?: string;
+  referenceImage?: string;
+  lastGeneratedDescription?: string;
 }
 
 interface VideoPlayerProps {

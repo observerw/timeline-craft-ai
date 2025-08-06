@@ -1,19 +1,42 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { AlertCircle, Image, Loader2, RefreshCw, X } from 'lucide-react';
-import { useState } from 'react';
+import {
+  AlertCircle,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  FileText,
+  Image,
+  Loader2,
+  RefreshCw,
+  Upload,
+  Video,
+  X,
+  XCircle,
+} from 'lucide-react';
+import { useState, useRef } from 'react';
 
 export interface Segment {
   id: string;
   startTime: number;
   endTime: number;
   description: string;
-  status: 'empty' | 'generating' | 'ready' | 'error';
+  status:
+    | 'empty'
+    | 'description-added'
+    | 'generating'
+    | 'ready'
+    | 'description-modified'
+    | 'video-ready'
+    | 'error';
   startFrame?: string;
   endFrame?: string;
+  referenceImage?: string;
+  lastGeneratedDescription?: string; // 用于跟踪上次生成图像时的描述
 }
 
 interface SegmentEditPanelProps {
@@ -31,6 +54,7 @@ export const SegmentEditPanel = ({
 }: SegmentEditPanelProps) => {
   const [description, setDescription] = useState(segment.description);
   const [imageDescription, setImageDescription] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -40,25 +64,124 @@ export const SegmentEditPanel = ({
 
   const handleDescriptionChange = (value: string) => {
     setDescription(value);
-    onUpdateSegment(segment.id, { description: value });
+
+    // 根据描述变化更新状态
+    let newStatus = segment.status;
+    if (value.trim() === '') {
+      newStatus = 'empty';
+    } else if (segment.status === 'empty') {
+      newStatus = 'description-added';
+    } else if (segment.status === 'ready' || segment.status === 'video-ready') {
+      // 如果描述与上次生成时不同，标记为已修改
+      if (
+        segment.lastGeneratedDescription &&
+        value !== segment.lastGeneratedDescription
+      ) {
+        newStatus = 'description-modified';
+      }
+    }
+
+    onUpdateSegment(segment.id, { description: value, status: newStatus });
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // 检查文件类型
+      if (!file.type.startsWith('image/')) {
+        alert('请选择图片文件');
+        return;
+      }
+
+      // 检查文件大小 (限制为5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('图片文件大小不能超过5MB');
+        return;
+      }
+
+      // 创建预览URL
+      const imageUrl = URL.createObjectURL(file);
+      onUpdateSegment(segment.id, { referenceImage: imageUrl });
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleRemoveReference = () => {
+    if (segment.referenceImage) {
+      URL.revokeObjectURL(segment.referenceImage);
+    }
+    onUpdateSegment(segment.id, { referenceImage: undefined });
   };
 
   const getStatusDisplay = () => {
     switch (segment.status) {
       case 'empty':
-        return { text: '等待描述', color: 'text-muted-foreground', icon: null };
+        return {
+          text: '等待描述',
+          color: 'text-muted-foreground',
+          bgColor: 'bg-muted/30 border-border',
+          icon: Clock,
+          description: '请添加片段描述以开始生成图像',
+        };
+      case 'description-added':
+        return {
+          text: '描述已添加',
+          color: 'text-primary',
+          bgColor: 'bg-primary/10 border-primary/20',
+          icon: FileText,
+          description: '描述已添加，点击生成图像按钮开始创建首尾帧',
+        };
       case 'generating':
-        return { text: '生成中...', color: 'text-primary', icon: Loader2 };
+        return {
+          text: '生成中',
+          color: 'text-primary',
+          bgColor: 'bg-primary/20 border-primary/30',
+          icon: Loader2,
+          description: 'AI正在生成片段的首尾帧图像，请稍候...',
+        };
       case 'ready':
-        return { text: '已就绪', color: 'text-green-500', icon: null };
+        return {
+          text: '图像已生成',
+          color: 'text-primary',
+          bgColor: 'bg-accent/50 border-accent',
+          icon: CheckCircle,
+          description: '首尾帧图像已生成完成，可以进行视频合成',
+        };
+      case 'description-modified':
+        return {
+          text: '描述已修改',
+          color: 'text-muted-foreground',
+          bgColor: 'bg-secondary border-border',
+          icon: AlertTriangle,
+          description: '描述已修改，建议重新生成图像以保持一致性',
+        };
+      case 'video-ready':
+        return {
+          text: '视频已生成',
+          color: 'text-accent-foreground',
+          bgColor: 'bg-accent border-accent',
+          icon: Video,
+          description: '该片段已参与视频生成，视频制作完成',
+        };
       case 'error':
         return {
           text: '生成失败',
           color: 'text-destructive',
-          icon: AlertCircle,
+          bgColor: 'bg-destructive/10 border-destructive/20',
+          icon: XCircle,
+          description: '图像生成过程中出现错误，请检查描述后重试',
         };
       default:
-        return { text: '未知状态', color: 'text-muted-foreground', icon: null };
+        return {
+          text: '未知状态',
+          color: 'text-muted-foreground',
+          bgColor: 'bg-muted/30 border-border',
+          icon: Clock,
+          description: '片段状态未知',
+        };
     }
   };
 
@@ -83,18 +206,23 @@ export const SegmentEditPanel = ({
       {/* 内容区域 */}
       <div className="flex-1 p-4 space-y-6 overflow-y-auto min-h-0">
         {/* 状态显示 */}
-        <Card className="p-3 bg-secondary/50">
-          <div className="flex items-center gap-2">
-            {StatusIcon && (
-              <StatusIcon
-                className={`h-4 w-4 ${status.color} ${
-                  segment.status === 'generating' ? 'animate-spin' : ''
-                }`}
-              />
-            )}
-            <span className={`text-sm font-medium ${status.color}`}>
-              {status.text}
-            </span>
+        <Card className={`p-4 border-2 ${status.bgColor}`}>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              {StatusIcon && (
+                <StatusIcon
+                  className={`h-4 w-4 ${status.color} ${
+                    segment.status === 'generating' ? 'animate-spin' : ''
+                  }`}
+                />
+              )}
+              <span className={`text-sm font-semibold ${status.color}`}>
+                {status.text}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {status.description}
+            </p>
           </div>
         </Card>
 
@@ -160,9 +288,76 @@ export const SegmentEditPanel = ({
 
         <Separator />
 
+        {/* 参考图片上传 */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label>参考图片</Label>
+            {segment.referenceImage && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleRemoveReference}
+                className="text-destructive hover:text-destructive"
+              >
+                <X className="h-3 w-3 mr-1" />
+                移除
+              </Button>
+            )}
+          </div>
+
+          <Card className="aspect-video bg-secondary/30 rounded-lg overflow-hidden border-2 border-dashed border-border">
+            {segment.referenceImage ? (
+              <div className="relative w-full h-full group">
+                <img
+                  src={segment.referenceImage}
+                  alt="参考图片"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleUploadClick}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    更换图片
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div
+                className="w-full h-full flex items-center justify-center text-muted-foreground cursor-pointer hover:bg-secondary/50 transition-colors"
+                onClick={handleUploadClick}
+              >
+                <div className="text-center">
+                  <Upload className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm font-medium">上传参考图片</p>
+                  <p className="text-xs opacity-70">
+                    支持 JPG、PNG 格式，最大 5MB
+                  </p>
+                </div>
+              </div>
+            )}
+          </Card>
+
+          <Input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+
+          <p className="text-xs text-muted-foreground">
+            上传参考图片可以帮助AI更好地理解您想要的画面效果
+          </p>
+        </div>
+
+        <Separator />
+
         {/* 图像预览区域 */}
         <div className="space-y-4">
-          <h4 className="font-medium">图像预览</h4>
+          <h4 className="font-medium">生成的图像</h4>
 
           {/* 首帧 */}
           <div className="space-y-2">

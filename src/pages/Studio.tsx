@@ -18,9 +18,18 @@ export interface Segment {
   startTime: number;
   endTime: number;
   description: string;
-  status: 'empty' | 'generating' | 'ready' | 'error';
+  status:
+    | 'empty'
+    | 'description-added'
+    | 'generating'
+    | 'ready'
+    | 'description-modified'
+    | 'video-ready'
+    | 'error';
   startFrame?: string;
   endFrame?: string;
+  referenceImage?: string;
+  lastGeneratedDescription?: string; // 用于跟踪上次生成图像时的描述
 }
 
 const Studio = () => {
@@ -84,6 +93,7 @@ const Studio = () => {
         status: 'ready',
         startFrame,
         endFrame,
+        lastGeneratedDescription: segment.description, // 记录生成时的描述
       });
 
       toast.success('图像生成成功！');
@@ -110,6 +120,11 @@ const Studio = () => {
       const videoUrl = `https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4`;
       setGeneratedVideo(videoUrl);
 
+      // 更新所有参与视频生成的片段状态为 video-ready
+      readySegments.forEach((segment) => {
+        handleUpdateSegment(segment.id, { status: 'video-ready' });
+      });
+
       toast.success('视频生成成功！');
     } catch (error) {
       toast.error('视频生成失败，请重试');
@@ -119,7 +134,10 @@ const Studio = () => {
   };
 
   const canGenerateVideo =
-    segments.length > 0 && segments.every((seg) => seg.status === 'ready');
+    segments.length > 0 &&
+    segments.every(
+      (seg) => seg.status === 'ready' || seg.status === 'video-ready'
+    );
 
   return (
     <div className="h-screen bg-background flex flex-col">

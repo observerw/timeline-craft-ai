@@ -1,17 +1,26 @@
-import { useState, useRef, useEffect } from 'react';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ZoomIn, ZoomOut, Plus, Trash2 } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { Trash2, ZoomIn, ZoomOut } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 export interface Segment {
   id: string;
   startTime: number;
   endTime: number;
   description: string;
-  status: 'empty' | 'generating' | 'ready' | 'error';
+  status:
+    | 'empty'
+    | 'description-added'
+    | 'generating'
+    | 'ready'
+    | 'description-modified'
+    | 'video-ready'
+    | 'error';
   startFrame?: string;
   endFrame?: string;
+  referenceImage?: string;
+  lastGeneratedDescription?: string;
 }
 
 interface TimelineEditorProps {
@@ -114,15 +123,21 @@ export const TimelineEditor = ({
   const getStatusColor = (status: Segment['status']) => {
     switch (status) {
       case 'empty':
-        return 'bg-muted border-border';
+        return 'bg-muted/50 border-border text-muted-foreground';
+      case 'description-added':
+        return 'bg-primary/10 border-primary/30 text-primary';
       case 'generating':
-        return 'bg-primary/20 border-primary animate-glow-pulse';
+        return 'bg-primary/20 border-primary/40 text-primary animate-glow-pulse';
       case 'ready':
-        return 'bg-primary/40 border-primary';
+        return 'bg-accent/70 border-accent text-accent-foreground';
+      case 'description-modified':
+        return 'bg-secondary border-border text-muted-foreground';
+      case 'video-ready':
+        return 'bg-accent border-accent text-accent-foreground';
       case 'error':
-        return 'bg-destructive/20 border-destructive';
+        return 'bg-destructive/10 border-destructive/30 text-destructive';
       default:
-        return 'bg-muted border-border';
+        return 'bg-muted/50 border-border text-muted-foreground';
     }
   };
 
@@ -257,7 +272,12 @@ export const TimelineEditor = ({
                       }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        onSelectSegment(segment);
+                        // 如果点击的是已选中的片段，则取消选中；否则选中该片段
+                        if (selectedSegment?.id === segment.id) {
+                          onSelectSegment(null);
+                        } else {
+                          onSelectSegment(segment);
+                        }
                       }}
                     >
                       <div className="p-2 text-xs font-medium truncate">
