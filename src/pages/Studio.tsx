@@ -1,17 +1,17 @@
-import { useState, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Play, Pause, Download, Save, HelpCircle } from 'lucide-react';
-import { TimelineEditor } from '@/components/studio/TimelineEditor';
 import { SegmentEditPanel } from '@/components/studio/SegmentEditPanel';
+import { TimelineEditor } from '@/components/studio/TimelineEditor';
 import { VideoPlayer } from '@/components/studio/VideoPlayer';
+import { Button } from '@/components/ui/button';
 import {
-  ResizablePanelGroup,
-  ResizablePanel,
   ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
 } from '@/components/ui/resizable';
-import { toast } from 'sonner';
+import { Download, HelpCircle, Play, Save } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export interface Segment {
   id: string;
@@ -122,7 +122,7 @@ const Studio = () => {
     segments.length > 0 && segments.every((seg) => seg.status === 'ready');
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="h-screen bg-background flex flex-col">
       {/* 顶部导航栏 */}
       <header className="border-b border-border bg-card/50 backdrop-blur">
         <div className="flex items-center justify-between px-6 py-4">
@@ -152,7 +152,10 @@ const Studio = () => {
         </div>
       </header>
 
-      <ResizablePanelGroup direction="horizontal" className="min-h-0 flex-1">
+      <ResizablePanelGroup
+        direction="horizontal"
+        className="min-h-0 flex-1 h-0"
+      >
         {/* 主编辑区域 */}
         <ResizablePanel defaultSize={selectedSegment ? 70 : 100} minSize={50}>
           <div className="flex flex-col h-full">
@@ -208,24 +211,33 @@ const Studio = () => {
         </ResizablePanel>
 
         {/* 右侧编辑面板 */}
-        {selectedSegment && (
-          <>
-            <ResizableHandle
-              withHandle
-              className="hover:bg-primary/50 hover:border-primary/80 border-2 border-transparent transition-all duration-200 cursor-col-resize"
-            />
-            <ResizablePanel defaultSize={30} minSize={20} maxSize={50}>
-              <div className="border-l border-border bg-card/30 h-full">
-                <SegmentEditPanel
-                  segment={selectedSegment}
-                  onUpdateSegment={handleUpdateSegment}
-                  onGenerateImages={handleGenerateImages}
-                  onClose={() => setSelectedSegment(null)}
-                />
-              </div>
-            </ResizablePanel>
-          </>
-        )}
+        <AnimatePresence mode="wait">
+          {selectedSegment && (
+            <>
+              <ResizableHandle
+                withHandle
+                className="hover:bg-primary/50 hover:border-primary/80 border-2 border-transparent transition-all duration-200 cursor-col-resize"
+              />
+              <ResizablePanel defaultSize={30} minSize={20} maxSize={50}>
+                <motion.div
+                  key="sidebar-content"
+                  initial={{ x: 100, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: 100, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  className="border-l border-border bg-card/30 h-full overflow-hidden"
+                >
+                  <SegmentEditPanel
+                    segment={selectedSegment}
+                    onUpdateSegment={handleUpdateSegment}
+                    onGenerateImages={handleGenerateImages}
+                    onClose={() => setSelectedSegment(null)}
+                  />
+                </motion.div>
+              </ResizablePanel>
+            </>
+          )}
+        </AnimatePresence>
       </ResizablePanelGroup>
     </div>
   );

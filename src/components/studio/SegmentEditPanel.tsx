@@ -66,9 +66,9 @@ export const SegmentEditPanel = ({
   const StatusIcon = status.icon;
 
   return (
-    <div className="h-full flex flex-col bg-card/50 backdrop-blur">
+    <div className="h-full overflow-scroll flex flex-col bg-card/50 backdrop-blur">
       {/* 头部 */}
-      <div className="flex items-center justify-between p-4 border-b border-border">
+      <div className="flex items-center justify-between p-4 border-b border-border flex-shrink-0">
         <div>
           <h3 className="font-semibold">片段编辑</h3>
           <p className="text-sm text-muted-foreground">
@@ -81,7 +81,7 @@ export const SegmentEditPanel = ({
       </div>
 
       {/* 内容区域 */}
-      <div className="flex-1 p-4 space-y-6 overflow-auto">
+      <div className="flex-1 p-4 space-y-6 overflow-y-auto min-h-0">
         {/* 状态显示 */}
         <Card className="p-3 bg-secondary/50">
           <div className="flex items-center gap-2">
