@@ -191,9 +191,9 @@ export const TimelineEditor = ({
           {/* 时间刻度 */}
           <div className="relative mb-2">
             <div
-              className="flex text-xs text-muted-foreground overflow-x-auto"
+              className="flex text-xs text-muted-foreground"
               style={{
-                width: `${Math.min(TIMELINE_DURATION * getPixelsPerSecond() * zoom, window.innerWidth)}px`,
+                width: `${TIMELINE_DURATION * getPixelsPerSecond() * zoom}px`,
                 minWidth: '100%',
               }}
             >
@@ -215,9 +215,9 @@ export const TimelineEditor = ({
           {/* 时间轴主体 */}
           <div
             ref={timelineRef}
-            className="relative h-20 bg-secondary/30 rounded-lg border border-border cursor-crosshair overflow-x-auto"
+            className="relative h-20 bg-secondary/30 rounded-lg border border-border cursor-crosshair"
             style={{
-              width: `${Math.min(TIMELINE_DURATION * getPixelsPerSecond() * zoom, window.innerWidth)}px`,
+              width: `${TIMELINE_DURATION * getPixelsPerSecond() * zoom}px`,
               minWidth: '100%',
             }}
             onMouseDown={handleMouseDown}
