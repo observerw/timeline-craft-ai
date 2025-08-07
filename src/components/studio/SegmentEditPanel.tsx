@@ -1,11 +1,16 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
+
+import { AutosizeTextarea } from '@/components/ui/autosize-textarea';
 import {
-  AlertCircle,
   AlertTriangle,
   CheckCircle,
   Clock,
@@ -18,7 +23,7 @@ import {
   X,
   XCircle,
 } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { useRef, useState } from 'react';
 
 export interface Segment {
   id: string;
@@ -54,6 +59,11 @@ export const SegmentEditPanel = ({
 }: SegmentEditPanelProps) => {
   const [description, setDescription] = useState(segment.description);
   const [imageDescription, setImageDescription] = useState('');
+  const [regenerateFeedback, setRegenerateFeedback] = useState('');
+  const [regenerateType, setRegenerateType] = useState<
+    'start' | 'end' | 'both'
+  >('both');
+  const [openPopover, setOpenPopover] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const formatTime = (seconds: number) => {
@@ -116,6 +126,42 @@ export const SegmentEditPanel = ({
     onUpdateSegment(segment.id, { referenceImage: undefined });
   };
 
+  const handleRegenerateClick = (
+    type: 'start' | 'end' | 'both',
+    buttonId: string
+  ) => {
+    setRegenerateType(type);
+    setRegenerateFeedback('');
+    setOpenPopover(buttonId);
+  };
+
+  const handleRegenerateConfirm = async () => {
+    if (!regenerateFeedback.trim()) {
+      return;
+    }
+
+    // 根据用户反馈更新描述
+    const updatedDescription = `${description}\n\n反馈优化：${regenerateFeedback}`;
+
+    // 更新片段描述
+    onUpdateSegment(segment.id, {
+      description: updatedDescription,
+      status: 'description-modified',
+    });
+
+    // 更新本地描述状态
+    setDescription(updatedDescription);
+
+    // 关闭弹窗
+    setOpenPopover(null);
+
+    // 重新生成图像
+    onGenerateImages({
+      ...segment,
+      description: updatedDescription,
+    });
+  };
+
   const getStatusDisplay = () => {
     switch (segment.status) {
       case 'empty':
@@ -156,7 +202,7 @@ export const SegmentEditPanel = ({
           color: 'text-muted-foreground',
           bgColor: 'bg-secondary border-border',
           icon: AlertTriangle,
-          description: '描述已修改，建议重新生成图像以保持一致性',
+          description: '描述已修改，请重新生成首尾帧图像',
         };
       case 'video-ready':
         return {
@@ -248,12 +294,13 @@ export const SegmentEditPanel = ({
             </div>
           </Card>
 
-          <Textarea
+          <AutosizeTextarea
             id="description"
             placeholder="例如：一只橘色小猫（主体）在阳光明媚的花园里缓慢行走（运动），周围有盛开的鲜花和绿色草地（背景）"
             value={description}
             onChange={(e) => handleDescriptionChange(e.target.value)}
-            className="min-h-[120px] resize-none"
+            minHeight={120}
+            maxHeight={300}
           />
           <p className="text-xs text-muted-foreground">
             按照主体、运动、背景三要素描述，有助于生成更准确的图像
@@ -263,35 +310,20 @@ export const SegmentEditPanel = ({
         {/* 额外描述 */}
         <div className="space-y-2">
           <Label htmlFor="imageDescription">图像风格描述（可选）</Label>
-          <Textarea
+          <AutosizeTextarea
             id="imageDescription"
             placeholder="补充图像风格，例如：电影级画质，黄金时间光照，超高清..."
             value={imageDescription}
             onChange={(e) => setImageDescription(e.target.value)}
-            className="min-h-[80px] resize-none"
+            minHeight={80}
+            maxHeight={200}
           />
         </div>
-
-        {/* 生成按钮 */}
-        <Button
-          onClick={() => onGenerateImages(segment)}
-          disabled={!description.trim() || segment.status === 'generating'}
-          className="w-full"
-        >
-          {segment.status === 'generating' ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <Image className="h-4 w-4 mr-2" />
-          )}
-          生成图像
-        </Button>
-
-        <Separator />
 
         {/* 参考图片上传 */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label>参考图片</Label>
+            <Label>参考图片（可选）</Label>
             {segment.referenceImage && (
               <Button
                 variant="ghost"
@@ -310,7 +342,7 @@ export const SegmentEditPanel = ({
               <div className="relative w-full h-full group">
                 <img
                   src={segment.referenceImage}
-                  alt="参考图片"
+                  alt="参考图片（可选）"
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -355,6 +387,22 @@ export const SegmentEditPanel = ({
 
         <Separator />
 
+        {/* 生成按钮 */}
+        <Button
+          onClick={() => onGenerateImages(segment)}
+          disabled={!description.trim() || segment.status === 'generating'}
+          className="w-full"
+        >
+          {segment.status === 'generating' ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <Image className="h-4 w-4 mr-2" />
+          )}
+          生成视频帧
+        </Button>
+
+        <Separator />
+
         {/* 图像预览区域 */}
         <div className="space-y-4">
           <h4 className="font-medium">生成的图像</h4>
@@ -364,15 +412,56 @@ export const SegmentEditPanel = ({
             <div className="flex items-center justify-between">
               <Label>首帧</Label>
               {segment.startFrame && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onGenerateImages(segment)}
-                  disabled={segment.status === 'generating'}
+                <Popover
+                  open={openPopover === 'start'}
+                  onOpenChange={(open) => !open && setOpenPopover(null)}
                 >
-                  <RefreshCw className="h-3 w-3 mr-1" />
-                  重新生成
-                </Button>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRegenerateClick('start', 'start')}
+                      disabled={segment.status === 'generating'}
+                    >
+                      <RefreshCw className="h-3 w-3 mr-1" />
+                      重新生成
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80" side="bottom" align="end">
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm">重新生成首帧</h4>
+                        <p className="text-xs text-muted-foreground">
+                          请描述当前图像不符合预期的地方
+                        </p>
+                      </div>
+                      <AutosizeTextarea
+                        placeholder="例如：人物表情不够自然，背景色彩过于鲜艳..."
+                        value={regenerateFeedback}
+                        onChange={(e) => setRegenerateFeedback(e.target.value)}
+                        className="text-sm"
+                        minHeight={80}
+                        maxHeight={200}
+                      />
+                      <div className="flex gap-2 justify-end">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setOpenPopover(null)}
+                        >
+                          取消
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={handleRegenerateConfirm}
+                          disabled={!regenerateFeedback.trim()}
+                        >
+                          确认
+                        </Button>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               )}
             </div>
             <Card className="aspect-video bg-secondary/30 rounded-lg overflow-hidden border-2 border-dashed border-border">
@@ -402,15 +491,56 @@ export const SegmentEditPanel = ({
             <div className="flex items-center justify-between">
               <Label>尾帧</Label>
               {segment.endFrame && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onGenerateImages(segment)}
-                  disabled={segment.status === 'generating'}
+                <Popover
+                  open={openPopover === 'end'}
+                  onOpenChange={(open) => !open && setOpenPopover(null)}
                 >
-                  <RefreshCw className="h-3 w-3 mr-1" />
-                  重新生成
-                </Button>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRegenerateClick('end', 'end')}
+                      disabled={segment.status === 'generating'}
+                    >
+                      <RefreshCw className="h-3 w-3 mr-1" />
+                      重新生成
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80" side="bottom" align="end">
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm">重新生成尾帧</h4>
+                        <p className="text-xs text-muted-foreground">
+                          请描述当前图像不符合预期的地方
+                        </p>
+                      </div>
+                      <AutosizeTextarea
+                        placeholder="例如：人物表情不够自然，背景色彩过于鲜艳..."
+                        value={regenerateFeedback}
+                        onChange={(e) => setRegenerateFeedback(e.target.value)}
+                        className="text-sm"
+                        minHeight={80}
+                        maxHeight={200}
+                      />
+                      <div className="flex gap-2 justify-end">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setOpenPopover(null)}
+                        >
+                          取消
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={handleRegenerateConfirm}
+                          disabled={!regenerateFeedback.trim()}
+                        >
+                          确认
+                        </Button>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               )}
             </div>
             <Card className="aspect-video bg-secondary/30 rounded-lg overflow-hidden border-2 border-dashed border-border">
