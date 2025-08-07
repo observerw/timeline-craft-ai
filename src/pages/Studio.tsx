@@ -7,8 +7,8 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
-import { Download, HelpCircle, Play, Save } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Download, HelpCircle, Play, Save } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -133,6 +133,43 @@ const Studio = () => {
     }
   };
 
+  const handleDownloadVideo = async () => {
+    if (!generatedVideo) {
+      toast.error('没有可下载的视频');
+      return;
+    }
+
+    try {
+      toast.info('开始下载视频...');
+
+      // 创建一个临时的 a 标签来触发下载
+      const link = document.createElement('a');
+      link.href = generatedVideo;
+      link.download = `timeline-craft-video-${Date.now()}.mp4`;
+      link.target = '_blank';
+
+      // 对于跨域资源，我们需要先获取blob
+      const response = await fetch(generatedVideo);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      link.href = blobUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // 清理blob URL
+      setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+      }, 100);
+
+      toast.success('视频下载成功！');
+    } catch (error) {
+      console.error('下载失败:', error);
+      toast.error('视频下载失败，请重试');
+    }
+  };
+
   const canGenerateVideo =
     segments.length > 0 &&
     segments.every(
@@ -162,7 +199,12 @@ const Studio = () => {
                 项目
               </Button>
             </Link>
-            <Button variant="default" size="sm" disabled={!generatedVideo}>
+            <Button
+              variant="default"
+              size="sm"
+              disabled={!generatedVideo}
+              onClick={handleDownloadVideo}
+            >
               <Download className="h-4 w-4 mr-2" />
               导出
             </Button>
