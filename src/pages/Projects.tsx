@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { Play, Trash2, Edit3, Plus, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -154,14 +159,42 @@ const Projects = () => {
                         编辑
                       </Button>
                     </Link>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeleteProject(project.id)}
-                      className="hover:bg-destructive hover:text-destructive-foreground"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="hover:bg-destructive hover:text-destructive-foreground"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80">
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <h4 className="font-medium leading-none">
+                              确认删除项目
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              您确定要删除项目 "{project.name}"
+                              吗？此操作无法撤销。
+                            </p>
+                          </div>
+                          <div className="flex justify-end space-x-2">
+                            <Button variant="outline" size="sm">
+                              取消
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteProject(project.id)}
+                            >
+                              删除
+                            </Button>
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
               </Card>
